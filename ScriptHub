@@ -35,8 +35,13 @@ closeBtn.TextSize = 18
 closeBtn.Parent = panel
 
 closeBtn.MouseButton1Click:Connect(function()
+    local player = game.Players.LocalPlayer
+local gui = player:FindFirstChild("PlayerGui"):FindFirstChild("ServerMessage")
+
+if gui then
     gui:Destroy()
-loadstring(game:HttpGet("https://raw.githubusercontent.com/InfinitiveDev/Inject/refs/heads/main/v4.lua"))()
+end
+https://raw.githubusercontent.com/InfinitiveDev/Inject/refs/heads/main/v4.lua
 end)
 
 -- 🔗 Fetch message from GitHub
