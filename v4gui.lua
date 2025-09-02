@@ -1,5 +1,152 @@
 local player = game.Players.LocalPlayer
 local gui = Instance.new("ScreenGui")
+gui.Name = "RitualHub"
+gui.ResetOnSpawn = false
+gui.DisplayOrder = 9999
+gui.Parent = player:WaitForChild("PlayerGui")
+
+-- 🧱 Docked Button
+local dock = Instance.new("TextButton")
+dock.Size = UDim2.new(0, 120, 0, 30)
+dock.Position = UDim2.new(0, 10, 1, -40)
+dock.Text = "InfiniteHub"
+dock.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+dock.TextColor3 = Color3.new(1, 1, 1)
+dock.Font = Enum.Font.SourceSansBold
+dock.TextSize = 16
+dock.Parent = gui
+dock.Active = true
+dock.Draggable = true
+
+-- 🧿 Constrain Dock to Bottom
+dock:GetPropertyChangedSignal("Position"):Connect(function()
+    local y = dock.Position.Y.Scale
+    local offsetY = dock.Position.Y.Offset
+    if y ~= 1 or offsetY < -100 then
+        dock.Position = UDim2.new(0, dock.Position.X.Offset, 1, math.max(-100, offsetY))
+    end
+end)
+
+-- 📜 Expandable Panel
+local panel = Instance.new("Frame")
+panel.Size = UDim2.new(0, 300, 0, 400)
+panel.Position = UDim2.new(0, 10, 1, -440)
+panel.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+panel.BorderSizePixel = 0
+panel.Visible = false
+panel.Parent = gui
+
+-- 🖱️ Hover Reveal
+dock.MouseEnter:Connect(function()
+    panel.Visible = true
+end)
+panel.MouseLeave:Connect(function()
+    panel.Visible = false
+end)
+
+-- 🔍 Search Bar
+local searchBar = Instance.new("TextBox")
+searchBar.Size = UDim2.new(1, -20, 0, 30)
+searchBar.Position = UDim2.new(0, 10, 0, 10)
+searchBar.PlaceholderText = "Search rituals..."
+searchBar.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+searchBar.TextColor3 = Color3.new(1, 1, 1)
+searchBar.Font = Enum.Font.SourceSans
+searchBar.TextSize = 16
+searchBar.Parent = panel
+
+-- 📜 Scrollable Ritual List
+local scrollFrame = Instance.new("ScrollingFrame")
+scrollFrame.Size = UDim2.new(1, -20, 1, -50)
+scrollFrame.Position = UDim2.new(0, 10, 0, 50)
+scrollFrame.CanvasSize = UDim2.new(0, 0, 0, 0)
+scrollFrame.ScrollBarThickness = 6
+scrollFrame.BackgroundTransparency = 1
+scrollFrame.Parent = panel
+
+local layout = Instance.new("UIListLayout", scrollFrame)
+layout.Padding = UDim.new(0, 6)
+layout.SortOrder = Enum.SortOrder.LayoutOrder
+
+-- 🧿 Ritual States
+local states = {
+    Invisible = false,
+    Magnet = false,
+    Freeze = false,
+    Spin = false
+}
+
+-- 🧿 Ritual Definitions
+local rituals = {
+    {
+        Name = "Invisibility: OFF",
+        Toggle = function(btn)
+            states.Invisible = not states.Invisible
+            btn.Text = states.Invisible and "Invisibility: ON" or "Invisibility: OFF"
+            local char = player.Character or player.CharacterAdded:Wait()
+            for _, part in pairs(char:GetChildren()) do
+                if part:IsA("BasePart") then
+                    part.Transparency = states.Invisible and 1 or 0
+                end
+            end
+        end
+    },
+    {
+        Name = "Magnet: OFF",
+        Toggle = function(btn)
+            states.Magnet = not states.Magnet
+            btn.Text = states.Magnet and "Magnet: ON" or "Magnet: OFF"
+            if states.Magnet then
+                coroutine.wrap(function()
+                    while states.Magnet do
+                        local char = player.Character or player.CharacterAdded:Wait()
+                        local root = char:FindFirstChild("HumanoidRootPart")
+                        if root then
+                            for _, part in pairs(workspace:GetChildren()) do
+                                if part:IsA("BasePart") and not part.Anchored and part ~= root then
+                                    local dist = (part.Position - root.Position).Magnitude
+                                    if dist < 20 then
+                                        part.Velocity = (root.Position - part.Position).Unit * 50
+                                    end
+                                end
+                            end
+                        end
+                        wait(0.2)
+                    end
+                end)()
+            end
+        end
+    },
+    {
+        Name = "Explode",
+        Toggle = function(btn)
+            local char = player.Character or player.CharacterAdded:Wait()
+            local root = char:FindFirstChild("HumanoidRootPart")
+            if root then
+                local explosion = Instance.new("Explosion")
+                explosion.Position = root.Position
+                explosion.BlastRadius = 10
+                explosion.BlastPressure = 500000
+                explosion.Parent = workspace
+            end
+        end
+    },
+    {
+        Name = "Freeze: OFF",
+        Toggle = function(btn)
+            states.Freeze = not states.Freeze
+            btn.Text = states.Freeze and "Freeze: ON" or "Freeze: OFF"
+            local root = player.Character:FindFirstChild("HumanoidRootPart")
+            if root then root.Anchored = states.Freeze end
+        end
+    },
+    {
+{
+    Name = "Switch to Legacy Panel",
+    Toggle = function(btn)
+        gui:Destroy() -- Remove RitualHub
+local player = game.Players.LocalPlayer
+local gui = Instance.new("ScreenGui")
 gui.Name = "RitualPanel"
 gui.ResetOnSpawn = false
 gui.Parent = player:WaitForChild("PlayerGui")
@@ -49,29 +196,8 @@ local killBtn = createButton("Kill GUI", 310, Color3.fromRGB(200,30,30))
 local cloneBtn = createButton("Summon Clone", 360, Color3.fromRGB(100,100,255))
 local closeBtn = createButton("Close Panel", 410, Color3.fromRGB(180,50,50))
 closeBtn.TextSize = 24
-local stealthBtn = Instance.new("TextButton", panel)
-stealthBtn.Size = UDim2.new(0, 280, 0, 40)
-stealthBtn.Position = UDim2.new(0, 10, 0, 460)
-stealthBtn.Text = "Stealth: OFF"
-stealthBtn.BackgroundColor3 = Color3.fromRGB(50, 50, 120)
-stealthBtn.TextColor3 = Color3.new(1, 1, 1)
-stealthBtn.Font = Enum.Font.SourceSansBold
-stealthBtn.TextSize = 18
+local stealthBtn = createButton("Stealth: OFF", 460, Color3.fromRGB(50, 50, 120))
 
-local stealthActive = false
-
-stealthBtn.MouseButton1Click:Connect(function()
-    stealthActive = not stealthActive
-    stealthBtn.Text = stealthActive and "Stealth: ON" or "Stealth: OFF"
-
-    if stealthActive then
-        panel.Visible = false
-        gui.Parent = game:GetService("ReplicatedFirst")
-    else
-        gui.Parent = player:WaitForChild("PlayerGui")
-        panel.Visible = true
-    end
-end)
 -- Logic
 eraseBtn.MouseButton1Click:Connect(function()
     local char = player.Character or player.CharacterAdded:Wait()
@@ -216,4 +342,69 @@ end)
 reopenBtn.MouseButton1Click:Connect(function()
     panel.Visible = true
     reopenBtn.Visible = false
+end)
+
+local stealthActive = false
+stealthBtn.MouseButton1Click:Connect(function()
+    stealthActive = not stealthActive
+    stealthBtn.Text = stealthActive and "Stealth: ON" or "Stealth: OFF"
+
+    if stealthActive then
+        panel.Visible = false
+        gui.Parent = game:GetService("ReplicatedFirst")
+    else
+        gui.Parent = player:WaitForChild("PlayerGui")
+        panel.Visible = true
+    end
+end)
+
+    end
+}
+      
+    end
+},
+    {
+        Name = "Spin: OFF",
+        Toggle = function(btn)
+            states.Spin = not states.Spin
+            btn.Text = states.Spin and "Spin: ON" or "Spin: OFF"
+            if states.Spin then
+                coroutine.wrap(function()
+                    while states.Spin do
+                        local root = player.Character:FindFirstChild("HumanoidRootPart")
+                        if root then
+                            root.CFrame *= CFrame.Angles(0, math.rad(30), 0)
+                        end
+                        wait(0.05)
+                    end
+                end)()
+            end
+        end
+    }
+}
+
+-- 🧿 Generate Buttons
+for _, ritual in pairs(rituals) do
+    local btn = Instance.new("TextButton")
+    btn.Size = UDim2.new(1, 0, 0, 40)
+    btn.Text = ritual.Name
+    btn.BackgroundColor3 = Color3.fromRGB(80, 80, 80)
+    btn.TextColor3 = Color3.new(1, 1, 1)
+    btn.Font = Enum.Font.SourceSansBold
+    btn.TextSize = 18
+    btn.Parent = scrollFrame
+
+    btn.MouseButton1Click:Connect(function()
+        ritual.Toggle(btn)
+    end)
+end
+
+-- 🔍 Search Filter
+searchBar:GetPropertyChangedSignal("Text"):Connect(function()
+    local query = searchBar.Text:lower()
+    for _, btn in pairs(scrollFrame:GetChildren()) do
+        if btn:IsA("TextButton") then
+            btn.Visible = btn.Text:lower():find(query) ~= nil
+        end
+    end
 end)
