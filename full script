@@ -282,9 +282,6 @@ spinBtn.MouseButton1Click:Connect(function()
     end
 end)
 
-killBtn.MouseButton1Click:Connect(function()
-    gui:Destroy()
-end)
 
 local cloneModel = nil
 local cloneLoop = nil
