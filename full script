@@ -144,7 +144,6 @@ local rituals = {
 {
     Name = "Switch to Legacy Panel",
     Toggle = function(btn)
-        gui:Destroy() -- Remove RitualHub
 local player = game.Players.LocalPlayer
 local gui = Instance.new("ScreenGui")
 gui.Name = "RitualPanel"
